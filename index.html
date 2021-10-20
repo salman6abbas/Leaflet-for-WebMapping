@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+        }
+        .cordinate{
+            position: absolute;
+            bottom: 10px;
+            right: 50%;
+            color: white;
+            font-weight: bold;
+            background-color: brown;
+            
+        }
+    </style>
+</head>
+
+<body>
+    <div id='map'>
+        <div class="leaflet-control cordinate"></div>
+    </div>
+</body>
+
+</html>
+<script src = './data/points.js'></script>
+<script src="./data/line_polygon.js"></script>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    // Map Initialization
+    var map = L.map('map').setView([ 40.73,  -73.93], 7);
+    // Osm Layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    osm.addTo(map);
+
+    var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+        maxZoom: 20,
+        attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+    });
+    // Stadia_AlidadeSmoothDark.addTo(map)
+
+    var myIcon = L.icon({
+        iconUrl: './images/red-icon.png',
+        iconSize: [48, 48],
+
+    });
+    var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+    // googleStreets.addTo(map)
+
+    var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+    // googleSat.addTo(map)
+    var marker = L.marker([40.73,  -73.93], { icon: myIcon, draggable: true })
+    var popup = marker.bindPopup("That's New York City! " + marker.getLatLng()).openPopup();
+    popup.addTo(map)
+
+    console.log(marker.toGeoJSON())
+
+    // Layer Controls
+    var points = L.points = L.geoJSON(points).addTo(map)
+    var line_polygon = L.geoJSON(line_polygon,{
+        onEachFeature: function(feature, layer){
+            layer.bindPopup(feature.properties.name)
+        },
+        style:{
+            fillColor: 'red',
+            fillOpacity: 0.4,
+        }
+    }).addTo(map)
+
+    var baseMaps = {
+        "OSM": osm,
+        "Dark": Stadia_AlidadeSmoothDark,
+        "Google Street Map": googleStreets,
+        "Google Satellite": googleSat
+    };
+
+    var overlayMaps = {
+        "Marker": marker,
+        "Point Data" : points,
+        "Line & Polygong Data": line_polygon
+    };
+     
+    L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+    map.on('mousemove', function(event){
+        document.getElementsByClassName("cordinate")[0].innerHTML = "lat: " +event.latlng.lat + " lng: " + event.latlng.lng 
+        console.log ('lat:' + event.latlng.lat, 'lng:' + event.latlng.lng)
+    })
+
+</script>
